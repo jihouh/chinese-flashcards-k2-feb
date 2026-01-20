@@ -273,11 +273,22 @@
         });
     }
 
+
     function newTraceChar() {
         currentTraceChar = charArray[Math.floor(Math.random() * charArray.length)];
         document.getElementById('writer-container').innerHTML = '';
         document.getElementById('trace-pinyin').innerText = pinyinMap[currentTraceChar] || '';
-        writer = HanziWriter.create('writer-container', currentTraceChar, { width: 220, height: 220, padding: 10, showOutline: true, strokeColor: '#FF6B6B' });
+    
+    // ADD SPEED SETTINGS HERE
+        writer = HanziWriter.create('writer-container', currentTraceChar, {
+            width: 220,
+            height: 220,
+            padding: 10,
+            showOutline: true,
+            strokeColor: '#FF6B6B',
+            strokeAnimationSpeed: 1, // Double speed (Default is 1)
+            delayBetweenStrokes: 100 // 100ms pause (Default is 300)
+            });
         replayStrokes();
     }
 
