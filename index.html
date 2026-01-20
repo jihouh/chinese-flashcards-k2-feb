@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ka Yan's Learning Chinese is Fun</title>
+    <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary: #FF6B6B; --secondary: #4ECDC4; --yellow: #FFE66D;
+            --blue: #45aaf2; --bg: #F7FFF7; --text: #2F2F2F; --shadow: #d4e5d4;
+            --lib-border: #e8e8e8; --purple: #a55eea; --gold: #FFD700;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg);
+            margin: 0; padding: 0; color: var(--text); overscroll-behavior: none;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+
+        .header {
+            width: 100%; max-width: 900px; display: flex; justify-content: space-between;
+            align-items: center; padding: 15px; box-sizing: border-box;
+        }
+
+        h1 { font-size: 20px; color: var(--primary); margin: 0; font-family: 'Klee One', cursive; font-weight: 600; }
+
+        .progress-banner {
+            background: white; padding: 10px 20px; border-radius: 50px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-top: 10px;
+            font-weight: bold; color: var(--purple); border: 2px solid var(--purple);
+        }
+
+        .fullscreen-btn {
+            background: #eee; color: #666; font-size: 12px; padding: 8px 12px;
+            border-radius: 10px; border: 1px solid #ddd; cursor: pointer; font-weight: bold;
+        }
+
+        .nav-bar {
+            position: fixed; bottom: 0; width: 100%; background: white; 
+            display: flex; justify-content: space-around; padding: 10px 0;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.08); z-index: 100;
+        }
+
+        .nav-item { font-family: 'Klee One', cursive; font-weight: bold; color: #888; cursor: pointer; font-size: 14px; text-align: center; flex: 1; }
+        .nav-item i { display: block; font-size: 24px; margin-bottom: 2px; font-style: normal; }
+        .nav-item.active { color: var(--primary); }
+
+        .page { display: none; width: 100%; max-width: 500px; padding: 5px 10px 100px 10px; text-align: center; box-sizing: border-box; }
+        .page.active { display: flex; flex-direction: column; align-items: center; }
+
+        .quote-box { 
+            background: white; padding: 25px; border-radius: 20px; 
+            border: 3px dashed var(--secondary); margin: 20px 0; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05); min-height: 80px; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .quote-box p { font-family: 'Klee One', cursive; font-size: 19px; color: #444; line-height: 1.4; margin: 0; font-weight: 600; }
+        .speaker-hint { font-size: 14px; color: var(--secondary); margin-top: 8px; font-weight: bold; }
+
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%; }
+        .card { background: white; border-radius: 20px; min-height: 130px; box-shadow: 0 6px 0px var(--shadow); border: 4px solid var(--secondary); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
+        .play-char { font-size: 65px; line-height: 1; color: #000; }
+        
+        .lib-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; }
+        .lib-item { 
+            background: white; border-radius: 12px; padding: 10px 0; border: 2px solid var(--lib-border); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            aspect-ratio: 1/1.2; cursor: pointer; position: relative; user-select: none;
+        }
+        .lib-star { position: absolute; top: 2px; right: 4px; font-size: 10px; font-weight: bold; }
+        .lib-char { font-size: 32px; font-weight: bold; color: #000; pointer-events: none; }
+        .lib-pinyin { font-size: 10px; color: var(--primary); font-weight: bold; pointer-events: none; }
+
+        .match-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; }
+        .match-card { background: white; border-radius: 15px; border: 3px solid var(--secondary); display: flex; align-items: center; justify-content: center; aspect-ratio: 2.2 / 1; cursor: pointer; }
+        .match-card-selected { background-color: var(--yellow) !important; border-color: var(--primary) !important; }
+
+        button.action-btn { padding: 12px 15px; border-radius: 15px; border: none; color: white; font-weight: 900; cursor: pointer; font-family: 'Klee One', cursive; box-shadow: 0 4px 0 rgba(0,0,0,0.1); font-size: 13px; }
+        
+        /* FOCUS OVERLAY STYLES */
+        #focus-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 200; align-items: center; justify-content: center; }
+        .focus-card { background: white; width: 280px; padding: 25px; border-radius: 30px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+        #focus-writer-container { background: #f9f9f9; border-radius: 15px; border: 2px solid var(--lib-border); margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Ka Yan's Chinese ✨</h1>
+        <button id="fullscreenToggle" class="fullscreen-btn" onclick="toggleFullScreen()">🖥️ FULLSCREEN</button>
+    </div>
+
+    <div id="home-page" class="page active">
+        <h2 style="font-family: 'Klee One', cursive; color: var(--primary); font-size: 28px; margin-bottom: 0;">Hi Ka Yan! 👋</h2>
+        <div id="mastery-banner" class="progress-banner">🌟 0 Stars Collected</div>
+        <div class="quote-box" onclick="readQuoteOutLoud()">
+            <p id="motivational-quote">Loading magic words...</p>
+            <div class="speaker-hint">Tap to hear me! 🔉</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%;">
+            <button class="action-btn" style="background: var(--secondary); height: 90px; font-size: 18px;" onclick="showPage('game', document.getElementById('nav-game'))">📖 Learn</button>
+            <button class="action-btn" style="background: var(--blue); height: 90px; font-size: 18px;" onclick="showPage('trace', document.getElementById('nav-trace'))">✍️ Trace</button>
+            <button class="action-btn" style="background: var(--purple); height: 90px; font-size: 18px;" onclick="showPage('match', document.getElementById('nav-match'))">🧩 Match</button>
+            <button class="action-btn" style="background: var(--primary); height: 90px; font-size: 18px;" onclick="showPage('lib', document.getElementById('nav-lib'))">📚 Lib</button>
+        </div>
+    </div>
+
+    <div id="game-page" class="page">
+        <div id="cardGrid" class="grid"></div>
+        <div style="margin-top:20px; display:flex; gap:10px; justify-content:center; flex-wrap: wrap;">
+            <button id="backBtn" class="action-btn" onclick="goBack()" style="background:var(--yellow); color:var(--text); min-width: 80px;" disabled>⬅️ BACK</button>
+            <button class="action-btn" onclick="shufflePlay()" style="background:var(--secondary); min-width: 80px;">🔄 NEW</button>
+            <button class="action-btn" onclick="togglePinyin('play')" style="background:var(--primary); min-width: 80px;">👀 PINYIN</button>
+        </div>
+    </div>
+
+    <div id="trace-page" class="page">
+        <div id="trace-msg" class="progress-banner" style="margin-bottom:10px;">Watch... 👁️</div>
+        <div style="background:white; padding:15px; border-radius:20px; border:4px solid var(--secondary); margin-bottom:15px;"><div id="writer-container"></div></div>
+        <div id="trace-pinyin" style="font-size:22px; color:var(--primary); font-weight:900; visibility:hidden; height:30px; margin-bottom:10px;"></div>
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap: wrap;">
+            <button class="action-btn" onclick="replayStrokes()" style="background:var(--blue); min-width: 80px;">🔁 REPLAY</button>
+            <button class="action-btn" onclick="togglePinyin('trace')" style="background:var(--primary); min-width: 80px;">👀 PINYIN</button>
+            <button class="action-btn" onclick="newTraceChar()" style="background:var(--secondary); min-width: 80px;">🔄 NEXT</button>
+        </div>
+    </div>
+
+    <div id="match-page" class="page">
+        <div id="match-hint" class="progress-banner" style="margin-bottom:10px;">Find the pairs! 🧩</div>
+        <div id="matchGrid" class="match-grid"></div>
+        <button id="match-next-btn" class="action-btn" onclick="startMatchGame()" style="display:none; background:var(--secondary); margin-top:20px; width: 100%;">🎮 PLAY AGAIN</button>
+    </div>
+
+    <div id="lib-page" class="page">
+        <div class="progress-banner" style="margin-bottom:10px;">Tap to Hear 🔉 Hold for Strokes ✍️</div>
+        <div id="libGrid" class="lib-grid"></div>
+    </div>
+
+    <div class="nav-bar">
+        <div class="nav-item active" onclick="showPage('home', this)"><i>🏠</i>Home</div>
+        <div id="nav-game" class="nav-item" onclick="showPage('game', this)"><i>📖</i>Learn</div>
+        <div id="nav-trace" class="nav-item" onclick="showPage('trace', this)"><i>✍️</i>Trace</div>
+        <div id="nav-match" class="nav-item" onclick="showPage('match', this)"><i>🧩</i>Match</div>
+        <div id="nav-lib" class="nav-item" onclick="showPage('lib', this)"><i>📚</i>Lib</div>
+    </div>
+
+    <div id="focus-overlay" onclick="closeFocus()">
+        <div class="focus-card" onclick="event.stopPropagation()">
+            <div id="focus-writer-container"></div>
+            <div id="focus-pinyin-val" style="font-size:28px; color:var(--primary); font-weight:bold; margin-top:5px;"></div>
+            <div id="focus-star-count" style="font-size:16px; color:var(--purple); margin-bottom:15px;"></div>
+            <button class="action-btn" onclick="animateFocusOnly()" style="background:var(--blue); width:100%;">🔁 REPLAY</button>
+            <button class="action-btn" onclick="closeFocus()" style="background:var(--primary); width:100%; margin-top:10px;">❌ CLOSE</button>
+        </div>
+    </div>
+
+<script>
+    const quotes = ["Every character is a seed! 🌱", "Your brain is a superhero muscle! 💪", "You are a star student! ⭐", "Mistakes help us grow! ✨", "Practice makes progress! 📈"];
+    const rawList = "桌椅朋友读铅笔叉面饭果汁煮炒猪肉";
+    const charArray = rawList.split('');
+    const pinyinMap = {
+    '桌': 'zhuō', 
+    '椅': 'yǐ', 
+    '朋': 'péng', 
+    '友': 'yǒu', 
+    '读': 'dú', 
+    '铅': 'qiān', 
+    '笔': 'bǐ', 
+    '叉': 'chā', 
+    '面': 'miàn', 
+    '饭': 'fàn', 
+    '果': 'guǒ', 
+    '汁': 'zhī', 
+    '煮': 'zhǔ', 
+    '炒': 'chǎo', 
+    '猪': 'zhū', 
+    '肉': 'ròu'};
+
+    let stars = JSON.parse(localStorage.getItem('kaYanStars')) || {};
+    let writer, focusWriter, pressTimer, currentTraceChar = "";
+    let playPinyinVisible = false, tracePinyinVisible = false, playHistory = [], currentSet = [];
+
+    function showPage(pageId, navEl) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById(pageId + '-page').classList.add('active');
+        navEl.classList.add('active');
+        if (pageId === 'home') updateMasteryUI();
+        if (pageId === 'game' && currentSet.length === 0) shufflePlay();
+        if (pageId === 'trace') newTraceChar();
+        if (pageId === 'match') startMatchGame();
+        if (pageId === 'lib') renderLib();
+    }
+
+    function addStar(char) {
+        stars[char] = (stars[char] || 0) + 1;
+        localStorage.setItem('kaYanStars', JSON.stringify(stars));
+        updateMasteryUI();
+    }
+
+    function updateMasteryUI() {
+        const total = Object.values(stars).reduce((a, b) => a + b, 0);
+        const banner = document.getElementById('mastery-banner');
+        if(banner) banner.innerText = `🌟 ${total} Stars Collected`;
+    }
+
+    // --- FOCUS MODE LOGIC ---
+    function openFocus(c) {
+        document.getElementById('focus-writer-container').innerHTML = '';
+        document.getElementById('focus-pinyin-val').innerText = pinyinMap[c] || '';
+        document.getElementById('focus-star-count').innerText = `Stars: ⭐${stars[c] || 0}`;
+        document.getElementById('focus-overlay').style.display = 'flex';
+        focusWriter = HanziWriter.create('focus-writer-container', c, { width: 200, height: 200, padding: 10, showOutline: true, strokeColor: '#FF6B6B' });
+        speak(c); 
+        focusWriter.animateCharacter();
+    }
+
+    function closeFocus() { document.getElementById('focus-overlay').style.display = 'none'; }
+    function animateFocusOnly() { if (focusWriter) focusWriter.animateCharacter(); }
+
+    // --- LIBRARY RENDER WITH LONG PRESS ---
+    function renderLib() {
+        const grid = document.getElementById('libGrid'); grid.innerHTML = '';
+        charArray.forEach((c) => {
+            const count = stars[c] || 0;
+            const item = document.createElement('div'); 
+            item.className = 'lib-item';
+            item.innerHTML = `<div class="lib-star" style="color:${count > 0 ? 'var(--gold)' : '#ccc'}">⭐${count}</div><div class="char-font lib-char">${c}</div><div class="lib-pinyin">${pinyinMap[c]||''}</div>`;
+            
+            // Interaction Logic
+            const startPress = (e) => { 
+                pressTimer = window.setTimeout(() => openFocus(c), 800); // 800ms for long press
+            };
+            const endPress = () => { window.clearTimeout(pressTimer); };
+
+            item.onmousedown = startPress; item.onmouseup = endPress; item.onmouseleave = endPress;
+            item.ontouchstart = startPress; item.ontouchend = endPress;
+            
+            item.onclick = () => speak(c);
+            grid.appendChild(item);
+        });
+    }
+
+    // --- REST OF THE MODULES ---
+    function togglePinyin(mode) {
+        if (mode === 'play') {
+            playPinyinVisible = !playPinyinVisible;
+            document.querySelectorAll('#game-page .pinyin-label').forEach(p => p.style.visibility = playPinyinVisible ? 'visible' : 'hidden');
+        } else {
+            tracePinyinVisible = !tracePinyinVisible;
+            document.getElementById('trace-pinyin').style.visibility = tracePinyinVisible ? 'visible' : 'hidden';
+        }
+    }
+
+    function shufflePlay() {
+        if (currentSet.length > 0) playHistory.push([...currentSet]);
+        currentSet = [...charArray].sort(() => 0.5 - Math.random()).slice(0, 4);
+        renderPlayCards(currentSet);
+        document.getElementById('backBtn').disabled = playHistory.length === 0;
+    }
+
+    function goBack() {
+        if (playHistory.length > 0) {
+            currentSet = playHistory.pop();
+            renderPlayCards(currentSet);
+            document.getElementById('backBtn').disabled = playHistory.length === 0;
+        }
+    }
+
+    function renderPlayCards(chars) {
+        const grid = document.getElementById('cardGrid'); grid.innerHTML = '';
+        chars.forEach(c => {
+            const card = document.createElement('div'); card.className = 'card';
+            card.innerHTML = `<div class="char-font play-char">${c}</div><div class="pinyin-label" style="font-size:18px; color:var(--primary); font-weight:900; visibility:${playPinyinVisible?'visible':'hidden'}">${pinyinMap[c]||''}</div>`;
+            card.onclick = () => speak(c); grid.appendChild(card);
+        });
+    }
+
+    function newTraceChar() {
+        currentTraceChar = charArray[Math.floor(Math.random() * charArray.length)];
+        document.getElementById('writer-container').innerHTML = '';
+        document.getElementById('trace-pinyin').innerText = pinyinMap[currentTraceChar] || '';
+        writer = HanziWriter.create('writer-container', currentTraceChar, { width: 220, height: 220, padding: 10, showOutline: true, strokeColor: '#FF6B6B' });
+        replayStrokes();
+    }
+
+    function replayStrokes() {
+        if (!writer) return;
+        document.getElementById('trace-msg').innerText = "Watch... 👁️";
+        writer.cancelQuiz();
+        writer.animateCharacter({ onComplete: () => {
+            document.getElementById('trace-msg').innerText = "Your turn! ✍️";
+            writer.quiz({ onComplete: () => { 
+                speak(currentTraceChar); confetti({ particleCount: 30 }); addStar(currentTraceChar);
+                document.getElementById('trace-msg').innerText = "Perfect! ⭐";
+            }});
+        }});
+    }
+
+    function startMatchGame() {
+        document.getElementById('match-next-btn').style.display = 'none';
+        const selected = [...charArray].sort(() => 0.5 - Math.random()).slice(0, 4);
+        let cards = [];
+        selected.forEach(c => { cards.push({val: c, m: c, type: 'c'}); cards.push({val: pinyinMap[c], m: c, type: 'p'}); });
+        cards.sort(() => 0.5 - Math.random());
+        const grid = document.getElementById('matchGrid'); grid.innerHTML = ''; let first = null, matches = 0;
+        cards.forEach(d => {
+            const el = document.createElement('div'); el.className = 'match-card';
+            el.innerHTML = d.type === 'c' ? `<div class="char-font" style="font-size:38px;">${d.val}</div>` : `<div style="font-weight:bold; color:var(--primary)">${d.val}</div>`;
+            el.onclick = () => {
+                if(el.style.opacity === '0.2' || el.classList.contains('match-card-selected')) return;
+                el.classList.add('match-card-selected');
+                if(!first) { first = {el, d}; } else {
+                    if(first.d.m === d.m) {
+                        const c1 = first.el, c2 = el;
+                        setTimeout(() => { 
+                            c1.style.opacity = '0.2'; c2.style.opacity = '0.2'; matches++;
+                            addStar(d.m);
+                            if(matches === 4) { confetti({ particleCount: 50 }); document.getElementById('match-next-btn').style.display = 'block'; }
+                        }, 300); speak(d.m);
+                    } else {
+                        const c1 = first.el, c2 = el;
+                        setTimeout(() => { c1.classList.remove('match-card-selected'); c2.classList.remove('match-card-selected'); }, 400);
+                    }
+                    first = null;
+                }
+            };
+            grid.appendChild(el);
+        });
+    }
+
+    function speak(t) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang = 'zh-CN'; window.speechSynthesis.speak(u); }
+    function readQuoteOutLoud() { const t = document.getElementById('motivational-quote').innerText; const u = new SpeechSynthesisUtterance(t); u.lang = 'en-US'; window.speechSynthesis.speak(u); }
+    function setRandomQuote() { document.getElementById('motivational-quote').innerText = quotes[Math.floor(Math.random()*quotes.length)]; }
+    function toggleFullScreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+    
+    // Init
+    setRandomQuote();
+    updateMasteryUI();
+</script>
+</body>
+</html>
