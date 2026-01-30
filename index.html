@@ -160,7 +160,7 @@
 
 <script>
     const quotes = ["Every character is a seed! 🌱", "Your brain is a superhero muscle! 💪", "You are a star student! ⭐", "Mistakes help us grow! ✨", "Practice makes progress! 📈"];
-    const rawList = "桌子椅朋友读书铅笔";
+    const rawList = "桌子椅朋友读书铅笔叉面白米饭果汁";
     const charArray = rawList.split('');
     const pinyinMap = {
     '桌': 'zhuō', 
@@ -171,7 +171,14 @@
     '读': 'dú', 
     '书': 'shū', 
     '铅': 'qiān', 
-    '笔': 'bǐ'};
+    '笔': 'bǐ',
+    '叉': 'chā',
+    '面': 'miàn',
+    '白': 'bái',
+        '米': 'mǐ',
+            '饭': 'fàn',
+            '果': 'guǒ',
+        '汁': 'zhī   };
 
     let stars = JSON.parse(localStorage.getItem('kaYanStars')) || {};
     let writer, focusWriter, pressTimer, currentTraceChar = "";
@@ -348,6 +355,7 @@
 </script>
 </body>
 </html>
+
 
 
 
