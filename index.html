@@ -160,8 +160,9 @@
 
 <script>
     const quotes = ["Every character is a seed! 🌱", "Your brain is a superhero muscle! 💪", "You are a star student! ⭐", "Mistakes help us grow! ✨", "Practice makes progress! 📈"];
-    const rawList = "叉面白米饭果汁";
-//桌子椅朋友读书铅笔
+    const rawList = "叉面白米饭果汁煮炒猪肉牛肉羊肉";
+//桌子椅朋友读书铅笔 
+//面包牛奶饼干鸡蛋点心
     const charArray = rawList.split('');
     const pinyinMap = {
 //    '桌': 'zhuō', 
@@ -173,14 +174,31 @@
 //    '书': 'shū', 
 //    '铅': 'qiān', 
 //    '笔': 'bǐ',
+        
       '叉': 'chā',
       '面': 'miàn',
       '白': 'bái',
       '米': 'mǐ',
       '饭': 'fàn',
       '果': 'guǒ',
-      '汁': 'zhī'   };
+      '汁': 'zhī',  
 
+    '煮': 'zhǔ',
+    '炒': 'chǎo',
+    '猪': 'zhū',
+    '肉': 'ròu',
+    '牛': 'niú',
+    '羊': 'yáng'     };
+//    '面': 'miàn',
+//    '包': 'bāo',
+//    '奶': 'nǎi',
+//    '饼': 'bǐng',
+//    '干': 'gān',
+//    '鸡': 'jī',
+//    '蛋': 'dàn',
+//    '点': 'diǎn',
+//    '心': 'xīn'   };
+        
     let stars = JSON.parse(localStorage.getItem('kaYanStars')) || {};
     let writer, focusWriter, pressTimer, currentTraceChar = "";
     let playPinyinVisible = false, tracePinyinVisible = false, playHistory = [], currentSet = [];
@@ -356,6 +374,7 @@
 </script>
 </body>
 </html>
+
 
 
 
